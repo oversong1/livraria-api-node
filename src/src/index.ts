@@ -59,8 +59,3 @@ app.listen(PORTA, () => {
 // app.listen(PORTA, () => {
 //   console.log(`API rodando em http://localhost:${PORTA}`);
 // });
-
-
-git remote add origin https://github.com/oversong1/livraria-api-node.git
-git remote -v
-git push -u origin main --follow-tags
