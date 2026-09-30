@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: livraria_db
+    environment:
+      POSTGRES_DB: livraria
+      POSTGRES_USER: livraria
+      POSTGRES_PASSWORD: livraria
+    ports:
+      - "5443:5432"
+    volumes:
+      # PostgreSQL 18+: o volume deve ficar na pasta-pai; a imagem cria
+      # internamente a subpasta da versão e não inicia com o caminho antigo.
+      - livraria_db_data:/var/lib/postgresql
+
+  adminer:
+    image: adminer:4
+    container_name: livraria_adminer
+    ports:
+      - "8091:8080"
+    depends_on:
+      - db
+
+  api:
+    build: ./docker/node
+    container_name: livraria_api
+    ports:
+      - "3333:3000"
+    volumes:
+      - ./src:/usr/src/app
+      # Volume anonimo: reserva /usr/src/app/node_modules DENTRO do container,
+      # sem deixar o bind mount acima (./src:/usr/src/app) sobrescrever essa pasta
+      # com o que existe (ou nao existe) no seu Windows. Sem essa linha, o
+      # "npm install" rodado DENTRO do container (Linux) fica visivel no host, mas o
+      # inverso tambem acontece - se sua pasta local nao tiver node_modules ainda,
+      # ela "esconde" o node_modules que o container acabou de instalar. Isso evita
+      # esse conflito, comum em todo projeto Node com Docker.
+      - livraria_node_modules:/usr/src/app/node_modules
+    environment:
+      # Docker Desktop no Windows NAO repassa pro container os eventos de "arquivo
+      # alterado" dos arquivos montados em ./src. Sem polling, o "tsx watch" nunca
+      # percebe o save e o servidor nao reinicia. Com isso, ele verifica os arquivos
+      # a cada ~300ms.
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
+    depends_on:
+      - db
+    command: sh -c "npm install && npm run dev"
+volumes:
+  livraria_db_data:
+  livraria_node_modules:
