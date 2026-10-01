@@ -12,6 +12,7 @@ services:
       # PostgreSQL 18+: o volume deve ficar na pasta-pai; a imagem cria
       # internamente a subpasta da versão e não inicia com o caminho antigo.
       - livraria_db_data:/var/lib/postgresql
+      - ./sql:/sql:ro
 
   adminer:
     image: adminer:4

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as livrosRepo from '../data/livros';
+import * as livrosRepo from '../repositories/livro.repository';
 
 
 export async function index(req: Request, res: Response) {
